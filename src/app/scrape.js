@@ -132,7 +132,7 @@ async function get_and_parse(url) {
     },
     {
       tableId: "Skills_Table",
-      rowSelector: "tr:nth-child(n+2)",
+      rowSelector: "tr:nth-child(n+2):nth-child(-n+7)",
       itemProperty: "skills"
     }
   ];
