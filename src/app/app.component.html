@@ -67,10 +67,10 @@
                 {{ formatUpgrade(c) }}</td>
             </tr>
             <tr *ngIf="item.upgrade.Price">
-              <td>Up Price (K)</td>
+              <td>Up Price</td>
               <td *ngFor="let p of item.upgrade.Price; index as i" (click)="setInventory(g.category, item.name, i)"
                 [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
-                {{ formatUpgrade(p, true) }}</td>
+                {{ formatUpgrade(p) }}</td>
             </tr>
           </table>
         </mat-tab>
