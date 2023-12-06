@@ -428,11 +428,11 @@ export class AppComponent implements OnDestroy {
     if (!s) return '?';
     if (s === '/' || s === 'starter') return '/';
     if (removeK && s[s.length - 1] === 'k') s = s.substring(0, s.length - 1);
-    else if (s.length > 3) s = s.substring(0, s.length - 3);
-    if (s.length > 3) {
-      const i = s.indexOf('.');
-      s = i === -1 ? s : s.substring(0, i);
-    }
+    // else if (s.length > 3) s = s.substring(0, s.length - 3);
+    // if (s.length > 3) {
+    //   const i = s.indexOf('.');
+    //   s = i === -1 ? s : s.substring(0, i);
+    // }
     return s;
   }
 
