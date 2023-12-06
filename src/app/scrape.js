@@ -107,6 +107,14 @@ function get(url) {
 }
 
 async function get_and_parse(url) {
+  // can't use fetch with node 16 - this works with v18 although the angular deps do not due to ERR_OSSL_EVP_UNSUPPORTED errors
+  // if we could upgrade dependencies and node, this would allow us to remove the `get` function
+  // let document, s;
+  // await fetch(url).then((response) => response.text())
+  //   .then((body) => {
+  //     document = new JSDOM(body).window.document;
+  //     s = document.toString();
+  //   });
   const s = await get(url);
   const document = new JSDOM(s).window.document;
   const item = {
