@@ -2,7 +2,7 @@ import {Component, OnDestroy} from '@angular/core';
 import {trigger, state, style, animate, transition} from '@angular/animations';
 
 import {GEARS} from './gears';
-import {FormGroup, FormControl} from '@angular/forms';
+import {UntypedFormGroup, UntypedFormControl} from '@angular/forms';
 import {Subscription, BehaviorSubject} from 'rxjs';
 import {debounceTime, map, shareReplay, tap} from 'rxjs/operators';
 
@@ -238,7 +238,7 @@ export class AppComponent implements OnDestroy {
   getPower = getPower;
   gears = [];
   inventories: ItemsByCategory;
-  formGroup: FormGroup;
+  formGroup: UntypedFormGroup;
 
   subscription: Subscription;
 
@@ -298,9 +298,9 @@ export class AppComponent implements OnDestroy {
     const configs = JSON.parse(localStorage.configs ?? '{}');
     const formConfigs = {};
     for (const attr of ATTRIBUTES)
-      formConfigs[attr] = new FormControl(configs[attr] ?? 1);
-    formConfigs['levelCap'] = new FormControl(configs['levelCap'] ?? 12);
-    this.formGroup = new FormGroup(formConfigs);
+      formConfigs[attr] = new UntypedFormControl(configs[attr] ?? 1);
+    formConfigs['levelCap'] = new UntypedFormControl(configs['levelCap'] ?? 12);
+    this.formGroup = new UntypedFormGroup(formConfigs);
 
     for (const category of CATEGORIES) {
       const items = [];
