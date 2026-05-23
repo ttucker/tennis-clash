@@ -1,0 +1,86 @@
+{
+  "Character": [
+    "https://tennis-clash.fandom.com/wiki/Abeke",
+    "https://tennis-clash.fandom.com/wiki/Anton",
+    "https://tennis-clash.fandom.com/wiki/Diana",
+    "https://tennis-clash.fandom.com/wiki/Diego",
+    "https://tennis-clash.fandom.com/wiki/Florence",
+    "https://tennis-clash.fandom.com/wiki/Hope",
+    "https://tennis-clash.fandom.com/wiki/Hyun-Jun",
+    "https://tennis-clash.fandom.com/wiki/Ingrid",
+    "https://tennis-clash.fandom.com/wiki/Jonah",
+    "https://tennis-clash.fandom.com/wiki/Kaito",
+    "https://tennis-clash.fandom.com/wiki/Leo",
+    "https://tennis-clash.fandom.com/wiki/Luc",
+    "https://tennis-clash.fandom.com/wiki/Mark",
+    "https://tennis-clash.fandom.com/wiki/Mei-Li",
+    "https://tennis-clash.fandom.com/wiki/Omar",
+    "https://tennis-clash.fandom.com/wiki/Viktoria"
+  ],
+  "Racket": [
+    "https://tennis-clash.fandom.com/wiki/Starter_Racket",
+    "https://tennis-clash.fandom.com/wiki/The_Bullseye",
+    "https://tennis-clash.fandom.com/wiki/The_Eagle",
+    "https://tennis-clash.fandom.com/wiki/The_Hammer",
+    "https://tennis-clash.fandom.com/wiki/The_Outback",
+    "https://tennis-clash.fandom.com/wiki/The_Panther",
+    "https://tennis-clash.fandom.com/wiki/The_Patriot",
+    "https://tennis-clash.fandom.com/wiki/The_Samurai",
+    "https://tennis-clash.fandom.com/wiki/Zeus"
+  ],
+  "Grip": [
+    "https://tennis-clash.fandom.com/wiki/Starter_Grip",
+    "https://tennis-clash.fandom.com/wiki/Tactical_Grip",
+    "https://tennis-clash.fandom.com/wiki/The_Cobra",
+    "https://tennis-clash.fandom.com/wiki/The_Forge",
+    "https://tennis-clash.fandom.com/wiki/The_Katana",
+    "https://tennis-clash.fandom.com/wiki/The_Machete",
+    "https://tennis-clash.fandom.com/wiki/The_Talon",
+    "https://tennis-clash.fandom.com/wiki/The_Titan",
+    "https://tennis-clash.fandom.com/wiki/The_Warrior"
+  ],
+  "Shoe": [
+    "https://tennis-clash.fandom.com/wiki/Starter_Shoes",
+    "https://tennis-clash.fandom.com/wiki/The_Anvil",
+    "https://tennis-clash.fandom.com/wiki/The_Ballistic",
+    "https://tennis-clash.fandom.com/wiki/The_Feather",
+    "https://tennis-clash.fandom.com/wiki/The_Hades_Treads",
+    "https://tennis-clash.fandom.com/wiki/The_Hunter",
+    "https://tennis-clash.fandom.com/wiki/The_Piranha",
+    "https://tennis-clash.fandom.com/wiki/The_Raptor",
+    "https://tennis-clash.fandom.com/wiki/The_Shuriken"
+  ],
+  "Wristband": [
+    "https://tennis-clash.fandom.com/wiki/Starter_Band",
+    "https://tennis-clash.fandom.com/wiki/Jolly_Roger",
+    "https://tennis-clash.fandom.com/wiki/The_Gladiator",
+    "https://tennis-clash.fandom.com/wiki/The_Kodiak",
+    "https://tennis-clash.fandom.com/wiki/The_Koi",
+    "https://tennis-clash.fandom.com/wiki/The_Macaw",
+    "https://tennis-clash.fandom.com/wiki/The_Rocket",
+    "https://tennis-clash.fandom.com/wiki/The_Shield",
+    "https://tennis-clash.fandom.com/wiki/The_Tomahawk"
+  ],
+  "Nutrition": [
+    "https://tennis-clash.fandom.com/wiki/Starter_Protein",
+    "https://tennis-clash.fandom.com/wiki/Antioxidants",
+    "https://tennis-clash.fandom.com/wiki/Carboload",
+    "https://tennis-clash.fandom.com/wiki/Increased_Hydration",
+    "https://tennis-clash.fandom.com/wiki/Keto_Sourcing",
+    "https://tennis-clash.fandom.com/wiki/Lean_Protein",
+    "https://tennis-clash.fandom.com/wiki/Macrobiotic",
+    "https://tennis-clash.fandom.com/wiki/Natural_Energy",
+    "https://tennis-clash.fandom.com/wiki/Vegan_Diet"
+  ],
+  "Workout": [
+    "https://tennis-clash.fandom.com/wiki/Starter_Training",
+    "https://tennis-clash.fandom.com/wiki/Endurance",
+    "https://tennis-clash.fandom.com/wiki/Lunges",
+    "https://tennis-clash.fandom.com/wiki/Mountain_Climber",
+    "https://tennis-clash.fandom.com/wiki/Plyometrics",
+    "https://tennis-clash.fandom.com/wiki/Powerlifting",
+    "https://tennis-clash.fandom.com/wiki/Resistance_Band",
+    "https://tennis-clash.fandom.com/wiki/Sprint",
+    "https://tennis-clash.fandom.com/wiki/Weight_lifting"
+  ]
+}
