@@ -217,20 +217,21 @@ function computeBestConfigs(config: Config) {
 }
 
 @Component({
-  selector: 'app-root',
-  animations: [
-    trigger('toggleClick', [
-      state('true', style({})),
-      state('false', style({
-        opacity: 1,
-        backgroundColor: 'yellow'
-      })),
-      transition('true => false', animate('0.1s')),
-      transition('false => true', animate('1.5s'))
-    ])
-  ],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    animations: [
+        trigger('toggleClick', [
+            state('true', style({})),
+            state('false', style({
+                opacity: 1,
+                backgroundColor: 'yellow'
+            })),
+            transition('true => false', animate('0.1s')),
+            transition('false => true', animate('1.5s'))
+        ])
+    ],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    standalone: false
 })
 export class AppComponent implements OnDestroy {
   CATEGORIES = CATEGORIES;
