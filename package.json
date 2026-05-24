@@ -10,19 +10,18 @@
     "build": "ng build --configuration production",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "postinstall": "npx ngcc --properties es2015 browser module main --first-only || true"
+    "e2e": "ng e2e"
   },
   "scrape": "node scripts/scrape_api.mjs",
   "private": true,
   "dependencies": {
     "@angular/animations": "^21.2.14",
-    "@angular/cdk": "^14.2.7",
+    "@angular/cdk": "^21.2.12",
     "@angular/common": "^21.2.14",
     "@angular/compiler": "^21.2.14",
     "@angular/core": "^21.2.14",
     "@angular/forms": "^21.2.14",
-    "@angular/material": "^14.2.7",
+    "@angular/material": "^21.2.12",
     "@angular/platform-browser": "^21.2.14",
     "@angular/platform-browser-dynamic": "^21.2.14",
     "@angular/router": "^21.2.14",
