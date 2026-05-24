@@ -68,18 +68,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "tennis-clash:build"
+            "buildTarget": "tennis-clash:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "tennis-clash:build:production"
+              "buildTarget": "tennis-clash:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "tennis-clash:build"
+            "buildTarget": "tennis-clash:build"
           }
         },
         "test": {
