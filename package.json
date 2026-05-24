@@ -2,7 +2,7 @@
   "name": "tennis-clash",
   "version": "0.0.0",
   "engines": {
-    "node": ">=16 <=24"
+    "node": ">=22 <=26"
   },
   "scripts": {
     "ng": "ng",
