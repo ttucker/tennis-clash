@@ -16,7 +16,6 @@
 }
 
 @if (mode !== 'JSON') {
-  <mat-tab-group>
   <mat-tab-group animationDuration="300ms">
     @for (g of gears; track g) {
       <mat-tab>
@@ -24,24 +23,21 @@
           {{g.category}}
         </ng-template>
         <ng-template matTabContent>
-          <mat-tab-group class="items"
-            animationDuration="300ms"
-            [selectedIndex]="getItemTabIndex(g.category, g.items)"
-            (selectedIndexChange)="onItemTabIndexChange(g.category, $event)">
+          <mat-tab-group class="items">
             @for (item of g.items; track item) {
               <mat-tab>
                 <ng-template mat-tab-label>
                   <table>
                     <tr>
                       <td>
-                        <img height="100" [src]="item.imageUrl" [alt]="item.name">
+                        <img width="auto" height="100" [src]="item.imageUrl" [alt]="item.name">
                       </td>
                     </tr>
                     <tr>
                       <td>
                         {{item.name}}
-                        @if (getInventoryLevel(g.category, item.name) !== undefined) {
-                          ({{ getInventoryLevel(g.category, item.name)! + 1 }})
+                        @if (inventories[g.category]?.[item.name] !== undefined) {
+                          ({{ inventories[g.category]?.[item.name]! + 1 }})
                         }
                         <!-- {{item.rarity}}<br> -->
                         <!-- {{item.foundIn}} -->
