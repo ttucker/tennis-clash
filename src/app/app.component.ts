@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 
@@ -10,10 +10,35 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
 
-const CATEGORIES = Object.keys(GEARS);
 const ATTRIBUTES = ['Agility', 'Stamina', 'Serve', 'Volley', 'Forehand', 'Backhand'] as const;
+type Category = keyof typeof GEARS;
+const CATEGORIES = Object.keys(GEARS) as Category[];
 type Attribute = typeof ATTRIBUTES[number];
-const STARTERS = [
+interface GearItem {
+  url: string;
+  name: string;
+  imageUrl: string | null;
+  upgrade: {
+    Cards?: string[];
+    Price?: string[];
+  };
+  skills: Partial<Record<Attribute, number[]>>;
+  foundIn?: string;
+}
+
+type GearMap = Record<Category, GearItem[]>;
+const GEARS_TYPED = GEARS as unknown as GearMap;
+type GearSortableItem = GearItem & { foundIn: string };
+interface GearItemView extends GearItem {
+  attrs: { attr: string; skills: number[] }[];
+  total: number[];
+}
+
+interface GearGroup {
+  category: Category;
+  items: GearItemView[];
+}
+const STARTERS: [Category, string][] = [
   ['Character', 'Jonah'],
   ['Racket', 'Starter Racket'],
   ['Grip', 'Starter Grip'],
@@ -32,8 +57,19 @@ function getPower(value: number, attrIndex: number) {
   return (value / EXPONENTS[attrIndex]) & MASK;
 }
 
+function toDisplayImageUrl(url: string | null, width = 320): string | null {
+  if (!url) return null;
+  if (url.includes('/scale-to-width-down/')) return url;
+  const marker = '/revision/latest';
+  const idx = url.indexOf(marker);
+  if (idx === -1) return url;
+  const prefix = url.slice(0, idx + marker.length);
+  const suffix = url.slice(idx + marker.length);
+  return `${prefix}/scale-to-width-down/${width}${suffix}`;
+}
+
 type LevelByItem = Record<string, number>;
-type ItemsByCategory = Record<string, LevelByItem>;
+type ItemsByCategory = Record<Category, LevelByItem>;
 
 interface PowerConfig {
   /** Minimum power requirement. */
@@ -82,7 +118,7 @@ type FormConfigs = Record<Attribute, number | string> & { levelCap: number };
 type AppFormModel = { levelCap: FormControl<number> } & Record<Attribute, FormControl<number | string>>;
 type AppMode = 'graph' | 'JSON';
 
-function initialConfig(inventories: ItemsByCategory, configs: FormConfigs) {
+function initialConfig(inventories: Partial<ItemsByCategory>, configs: FormConfigs) {
   localStorage.inventories = JSON.stringify(inventories);
   localStorage.configs = JSON.stringify(configs);
   localStorage[`configs${configs.levelCap}`] = JSON.stringify(configs);
@@ -111,20 +147,20 @@ function initialConfig(inventories: ItemsByCategory, configs: FormConfigs) {
     config.powerConfig[i] = { minimum, maximum };
   }
   for (let c = CATEGORIES.length - 1; c >= 0; c--) {
-    const cat = CATEGORIES[c];
-    const maxAttr = [];
-    const itemPowers = config.itemPowers[c] = {};
-    const itemLevel = config.itemLevel[c] = {};
+    const cat = CATEGORIES[c] as Category;
+    const maxAttr: number[] = [];
+    const itemPowers: Record<string, number> = config.itemPowers[c] = {};
+    const itemLevel: Record<string, number> = config.itemLevel[c] = {};
     for (const [name, inventoryLevel] of Object.entries<number>(inventories[cat] ?? {})) {
       const level = Math.min(inventoryLevel, configs.levelCap);
-      const item = GEARS[cat].find(item => item.name === name);
+      const item = GEARS_TYPED[cat].find((item: GearItem) => item.name === name);
       itemLevel[name] = level + 1;
       if (!item?.skills) {
         alert('Item not found: ' + name);
         continue;
       }
       let attrPowers = 0;
-      for (const [attr, values] of Object.entries<number[]>(item.skills)) {
+      for (const [attr, values] of Object.entries(item.skills as Record<string, number[]>)) {
         const i = ATTRIBUTES.indexOf(attr as Attribute);
         if (i === -1) {
           alert(`Attribute ${attr} not found for item ${name}`);
@@ -135,7 +171,7 @@ function initialConfig(inventories: ItemsByCategory, configs: FormConfigs) {
       }
       itemPowers[name] = attrPowers;
     }
-    const rem = config.maxRemainingPowers[c] = [];
+    const rem: number[] = config.maxRemainingPowers[c] = [];
     for (const [i] of ATTRIBUTES.entries()) {
       const nextRem = config.maxRemainingPowers[c + 1]?.[i] ?? 0;
       rem[i] = nextRem + maxAttr[i];
@@ -234,14 +270,15 @@ function computeBestConfigs(config: Config) {
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
 export class AppComponent implements OnDestroy {
   CATEGORIES = CATEGORIES;
   ATTRIBUTES = ATTRIBUTES;
   getPower = getPower;
-  gears = [];
-  inventories: ItemsByCategory;
+  gears: GearGroup[] = [];
+  inventories: Partial<ItemsByCategory>;
   formGroup: FormGroup<AppFormModel>;
 
   subscription: Subscription;
@@ -266,7 +303,7 @@ export class AppComponent implements OnDestroy {
       top = top.slice(0, Math.min(25, top.length));
       this.selectedConfig = top[0];
       this.isOpen = true;
-      const configToSave = {
+      const configToSave: { inventories: ItemsByCategory; configs: FormConfigs } & Record<string, unknown> = {
         inventories: JSON.parse(localStorage.inventories),
         configs: JSON.parse(localStorage.configs),
       };
@@ -282,16 +319,17 @@ export class AppComponent implements OnDestroy {
     shareReplay(1));
 
   selectedConfig: Config | null = null;
+  selectedItemTabIndexByCategory: Partial<Record<Category, number>> = {};
 
   mode: AppMode = 'graph';
   configJson = '';
 
   constructor() {
     this.inventories = JSON.parse(localStorage.inventories ?? '{}');
-    const nutrition = this.inventories["Nutrition"];
+    const nutrition = this.inventories['Nutrition'];
     if (nutrition && Object.prototype.hasOwnProperty.call(nutrition, 'Neutral Energy')) {
-      nutrition["Natural Energy"] = nutrition["Neutral Energy"];
-      delete nutrition["Neutral Energy"];
+      nutrition['Natural Energy'] = nutrition['Neutral Energy'];
+      delete nutrition['Neutral Energy'];
     }
     for (const [category, itemName] of STARTERS) {
       if (this.inventories[category]?.[itemName] === undefined) {
@@ -307,15 +345,15 @@ export class AppComponent implements OnDestroy {
     this.formGroup = new FormGroup<AppFormModel>(controls);
 
     for (const category of CATEGORIES) {
-      const items = [];
-      const value = GEARS[category];
+      const items: GearItemView[] = [];
+      const value = [...GEARS_TYPED[category]] as GearItem[];
       if (category !== 'Character') {
-        value.sort((a, b) => a.foundIn < b.foundIn ? -1 : 1);
+        (value as GearSortableItem[]).sort((a, b) => a.foundIn < b.foundIn ? -1 : 1);
       }
       for (const item of value) {
-        const attrs = [];
-        const total = [];
-        for (const [attr, skills] of Object.entries<number[]>(item.skills)) {
+        const attrs: { attr: string; skills: number[] }[] = [];
+        const total: number[] = [];
+        for (const [attr, skills] of Object.entries(item.skills as Record<string, number[]>)) {
           const i = ATTRIBUTES.indexOf(attr as Attribute);
           if (i === -1) {
             alert('Unknown attribute: ' + attr);
@@ -326,7 +364,7 @@ export class AppComponent implements OnDestroy {
             total[i] = (total[i] ?? 0) + skills[i];
           }
         }
-        items.push({ ...item, attrs, total });
+        items.push({ ...item, imageUrl: toDisplayImageUrl(item.imageUrl), attrs, total });
       }
       this.gears.push({ category, items });
     }
@@ -367,7 +405,7 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  setInventory(category: string, name: string, level: number) {
+  setInventory(category: Category, name: string, level: number) {
     let cat = this.inventories[category];
     if (!cat) cat = this.inventories[category] = {};
     if (cat[name] === level) {
@@ -384,8 +422,30 @@ export class AppComponent implements OnDestroy {
     return false;
   }
 
-  hasInventory(category: string, name: string, level: number) {
+  hasInventory(category: Category, name: string, level: number) {
     return this.inventories?.[category]?.[name] === level;
+  }
+
+  getItemTabIndex(category: Category, items: GearItemView[]): number {
+    const current = this.selectedItemTabIndexByCategory[category];
+    if (current !== undefined) {
+      return current;
+    }
+    const selectedName = Object.entries(this.inventories[category] ?? {})
+      .find(([, level]) => level !== undefined)?.[0];
+    if (!selectedName) {
+      return 0;
+    }
+    const idx = items.findIndex(item => item.name === selectedName);
+    return idx === -1 ? 0 : idx;
+  }
+
+  onItemTabIndexChange(category: Category, index: number) {
+    this.selectedItemTabIndexByCategory[category] = index;
+  }
+
+  getInventoryLevel(category: Category, itemName: string): number | undefined {
+    return this.inventories[category]?.[itemName];
   }
 
   stats(powers: number) {
@@ -399,17 +459,17 @@ export class AppComponent implements OnDestroy {
     return arr;
   }
 
-  isRangeValue(attr: string) {
+  isRangeValue(attr: Attribute) {
     const strValue = String(this.formGroup.controls[attr as Attribute].value);
     return strValue.indexOf('-') !== -1;
   }
 
-  isInvalidValue(attr: string) {
+  isInvalidValue(attr: Attribute) {
     const re = /^\d{1,3}(-\d{0,3})?$/;
     return !re.test(String(this.formGroup.controls[attr as Attribute].value));
   }
 
-  toggleFormat(attr: string) {
+  toggleFormat(attr: Attribute) {
     const attribute = attr as Attribute;
     const strValue = String(this.formGroup.controls[attribute].value);
     const newValue = this.isRangeValue(attr) ? +strValue.split('-')[0] : (strValue + '-999');
@@ -424,7 +484,7 @@ export class AppComponent implements OnDestroy {
     this.formGroup.controls.levelCap.setValue(levelCap);
   }
 
-  isIgnored(attr: string) {
+  isIgnored(attr: Attribute) {
     const value = String(this.formGroup.controls[attr as Attribute].value);
     return value.startsWith('0');
   }

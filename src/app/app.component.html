@@ -17,13 +17,17 @@
 
 @if (mode !== 'JSON') {
   <mat-tab-group>
+  <mat-tab-group animationDuration="300ms">
     @for (g of gears; track g) {
       <mat-tab>
         <ng-template mat-tab-label>
           {{g.category}}
         </ng-template>
         <ng-template matTabContent>
-          <mat-tab-group class="items">
+          <mat-tab-group class="items"
+            animationDuration="300ms"
+            [selectedIndex]="getItemTabIndex(g.category, g.items)"
+            (selectedIndexChange)="onItemTabIndexChange(g.category, $event)">
             @for (item of g.items; track item) {
               <mat-tab>
                 <ng-template mat-tab-label>
@@ -36,8 +40,8 @@
                     <tr>
                       <td>
                         {{item.name}}
-                        @if (inventories[g.category][item.name]; as level) {
-                          ({{ level + 1 }})
+                        @if (getInventoryLevel(g.category, item.name) !== undefined) {
+                          ({{ getInventoryLevel(g.category, item.name)! + 1 }})
                         }
                         <!-- {{item.rarity}}<br> -->
                         <!-- {{item.foundIn}} -->
@@ -48,7 +52,7 @@
                 <table class="border" cellpadding="5" cellspacing="0">
                   <tr>
                     <th width="80">Level [<a [href]="item.url + '?veaction=edit&section=2'" target="_blank">edit</a>]</th>
-                    @for (v of item.total; track v; let i = $index) {
+                    @for (v of item.total; track $index; let i = $index) {
                       <th width="25" (click)="setInventory(g.category, item.name, i)"
                         [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
                         {{ i + 1 }}
@@ -58,7 +62,7 @@
                   @for (a of item.attrs; track a) {
                     <tr>
                       <td>{{ a.attr }}</td>
-                      @for (s of a.skills; track s; let i = $index) {
+                      @for (s of a.skills; track $index; let i = $index) {
                         <td (click)="setInventory(g.category, item.name, i)"
                           [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
                         {{ s }}</td>
@@ -67,7 +71,7 @@
                   }
                   <tr>
                     <th>Total Power</th>
-                    @for (t of item.total; track t; let i = $index) {
+                    @for (t of item.total; track $index; let i = $index) {
                       <th (click)="setInventory(g.category, item.name, i)"
                         [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
                       {{ t }}</th>
@@ -76,7 +80,7 @@
                   @if (item.upgrade.Cards) {
                     <tr>
                       <td>Up Cards</td>
-                      @for (c of item.upgrade.Cards; track c; let i = $index) {
+                      @for (c of item.upgrade.Cards; track $index; let i = $index) {
                         <td (click)="setInventory(g.category, item.name, i)"
                           [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
                         {{ formatUpgrade(c) }}</td>
@@ -86,7 +90,7 @@
                   @if (item.upgrade.Price) {
                     <tr>
                       <td>Up Price</td>
-                      @for (p of item.upgrade.Price; track p; let i = $index) {
+                      @for (p of item.upgrade.Price; track $index; let i = $index) {
                         <td (click)="setInventory(g.category, item.name, i)"
                           [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
                         {{ formatUpgrade(p) }}</td>
@@ -123,7 +127,7 @@
         <th>Set Level Cap :</th>
         <td width="50">
           <mat-select [value]="levelCap" (selectionChange)="changeLevelCap($event.value)">
-            @for (e of [].constructor(9); track e; let i = $index) {
+            @for (e of [].constructor(9); track $index; let i = $index) {
               <mat-option [value]="i+4">{{ i+5 }}</mat-option>
             }
           </mat-select>
@@ -144,7 +148,7 @@
               <input type="text" [formControlName]="attr" style="width: 50px;">
             } @else {
               <mat-select [formControlName]="attr">
-                @for (e of [].constructor(121); track e; let i = $index) {
+                @for (e of [].constructor(121); track $index; let i = $index) {
                   <mat-option [value]="i">
                     @if (i) {
                       &#8805; {{ i }}
@@ -166,7 +170,7 @@
       @if (selectedConfig) {
         <table [@toggleClick]="isOpen" class="border" cellpadding="5" cellspacing="0">
           <tr height="40">
-            @for (c of topConfigs; track c; let i = $index) {
+            @for (c of topConfigs; track $index; let i = $index) {
               <th [ngClass]="{'selected': selectedConfig === c, 'number': true}"
                 (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
                 <div style="width: 25px">#{{ i + 1 }}</div>
@@ -175,7 +179,7 @@
           </tr>
           @for (attr of ATTRIBUTES; track attr; let attrIndex = $index) {
             <tr height="33" [ngClass]="{'ignored': isIgnored(attr)}">
-              @for (c of topConfigs; track c; let i = $index) {
+              @for (c of topConfigs; track $index; let i = $index) {
                 <td [ngClass]="{'selected': selectedConfig === c, 'number': true}"
                   (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
                 {{ getPower(c.currentPowers, attrIndex) }}</td>
@@ -183,7 +187,7 @@
             </tr>
           }
           <tr height="53">
-            @for (c of topConfigs; track c; let i = $index) {
+            @for (c of topConfigs; track $index; let i = $index) {
               <td [ngClass]="{'selected': selectedConfig === c, 'number': true}"
                 (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
                 <b>{{ c.totalPower }}</b>
