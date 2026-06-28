@@ -22,7 +22,10 @@ Note: headless test runs require a local Chrome binary (or setting `CHROME_BIN`)
 
 ## Running end-to-end tests
 
-Legacy Protractor e2e scaffolding exists in this repository, but `ng e2e` is not currently functional after Angular 22 migration.
+Run `npm run e2e` to execute end-to-end tests via Playwright.
+
+- First-time setup: `npx playwright install chromium`
+- Optional UI mode: `npm run e2e:ui`
 
 ## Further help
 
