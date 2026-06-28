@@ -1,13 +1,18 @@
-import {Component, OnDestroy} from '@angular/core';
-import {trigger, state, style, animate, transition} from '@angular/animations';
+import { Component, OnDestroy } from '@angular/core';
+import { trigger, state, style, animate, transition } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 
-import {GEARS} from './gears';
-import {UntypedFormGroup, UntypedFormControl} from '@angular/forms';
-import {Subscription, BehaviorSubject} from 'rxjs';
-import {debounceTime, map, shareReplay, tap} from 'rxjs/operators';
+import { GEARS } from './gears';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Subscription, BehaviorSubject } from 'rxjs';
+import { debounceTime, map, shareReplay, tap } from 'rxjs/operators';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
 
 const CATEGORIES = Object.keys(GEARS);
-const ATTRIBUTES = ['Agility', 'Stamina', 'Serve', 'Volley', 'Forehand', 'Backhand'];
+const ATTRIBUTES = ['Agility', 'Stamina', 'Serve', 'Volley', 'Forehand', 'Backhand'] as const;
+type Attribute = typeof ATTRIBUTES[number];
 const STARTERS = [
   ['Character', 'Jonah'],
   ['Racket', 'Starter Racket'],
@@ -27,15 +32,8 @@ function getPower(value: number, attrIndex: number) {
   return (value / EXPONENTS[attrIndex]) & MASK;
 }
 
-interface LevelByItem {
-  /** The current level of each item. */
-  [itemName: string]: number;
-}
-
-interface ItemsByCategory {
-  /** The available items for each category. */
-  [category: string]: LevelByItem;
-}
+type LevelByItem = Record<string, number>;
+type ItemsByCategory = Record<string, LevelByItem>;
 
 interface PowerConfig {
   /** Minimum power requirement. */
@@ -50,10 +48,10 @@ interface Config {
   itemNames: string[];
 
   /** The power of each available item in a category. */
-  itemPowers: {[itemName: string]: number}[];
+  itemPowers: Record<string, number>[];
 
   /** The level of each available item in a category. */
-  itemLevel: {[itemName: string]: number}[];
+  itemLevel: Record<string, number>[];
 
   /** The maximum power for the rest of the categories on the right. */
   maxRemainingPowers: number[][];
@@ -80,7 +78,11 @@ interface Config {
   startTime: number;
 }
 
-function initialConfig(inventories: ItemsByCategory, configs: any) {
+type FormConfigs = Record<Attribute, number | string> & { levelCap: number };
+type AppFormModel = { levelCap: FormControl<number> } & Record<Attribute, FormControl<number | string>>;
+type AppMode = 'graph' | 'JSON';
+
+function initialConfig(inventories: ItemsByCategory, configs: FormConfigs) {
   localStorage.inventories = JSON.stringify(inventories);
   localStorage.configs = JSON.stringify(configs);
   localStorage[`configs${configs.levelCap}`] = JSON.stringify(configs);
@@ -106,7 +108,7 @@ function initialConfig(inventories: ItemsByCategory, configs: any) {
       minimum = +range[0];
       maximum = +range[1];
     }
-    config.powerConfig[i] = {minimum, maximum};
+    config.powerConfig[i] = { minimum, maximum };
   }
   for (let c = CATEGORIES.length - 1; c >= 0; c--) {
     const cat = CATEGORIES[c];
@@ -123,7 +125,7 @@ function initialConfig(inventories: ItemsByCategory, configs: any) {
       }
       let attrPowers = 0;
       for (const [attr, values] of Object.entries<number[]>(item.skills)) {
-        const i = ATTRIBUTES.indexOf(attr);
+        const i = ATTRIBUTES.indexOf(attr as Attribute);
         if (i === -1) {
           alert(`Attribute ${attr} not found for item ${name}`);
           continue;
@@ -191,7 +193,7 @@ function computeBestConfigs(config: Config) {
 
   config.totalPower = 0;
   for (const [i] of ATTRIBUTES.entries()) {
-    const {minimum, maximum} = config.powerConfig[i];
+    const { minimum, maximum } = config.powerConfig[i];
     const maxRemainer = (catIdx >= CATEGORIES.length) ? 0 : (config.maxRemainingPowers[catIdx][i] ?? 0);
     const current = getPower(config.currentPowers, i);
     if (current + maxRemainer < minimum) return config;
@@ -217,21 +219,22 @@ function computeBestConfigs(config: Config) {
 }
 
 @Component({
-    selector: 'app-root',
-    animations: [
-        trigger('toggleClick', [
-            state('true', style({})),
-            state('false', style({
-                opacity: 1,
-                backgroundColor: 'yellow'
-            })),
-            transition('true => false', animate('0.1s')),
-            transition('false => true', animate('1.5s'))
-        ])
-    ],
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+  selector: 'app-root',
+  imports: [CommonModule, ReactiveFormsModule, MatTabsModule, MatDividerModule, MatSelectModule],
+  animations: [
+    trigger('toggleClick', [
+      state('true', style({})),
+      state('false', style({
+        opacity: 1,
+        backgroundColor: 'yellow'
+      })),
+      transition('true => false', animate('0.1s')),
+      transition('false => true', animate('1.5s'))
+    ])
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  standalone: true
 })
 export class AppComponent implements OnDestroy {
   CATEGORIES = CATEGORIES;
@@ -239,7 +242,7 @@ export class AppComponent implements OnDestroy {
   getPower = getPower;
   gears = [];
   inventories: ItemsByCategory;
-  formGroup: UntypedFormGroup;
+  formGroup: FormGroup<AppFormModel>;
 
   subscription: Subscription;
 
@@ -247,9 +250,9 @@ export class AppComponent implements OnDestroy {
   isOpen = true;
 
   bestConfigs$ = this.computeTrigger$.pipe(
-    tap(() => {this.isOpen = false;}),
+    tap(() => { this.isOpen = false; }),
     debounceTime(125),
-    map(() => initialConfig(this.inventories, this.formGroup.value)),
+    map(() => initialConfig(this.inventories, this.formGroup.getRawValue())),
     map(config => {
       let top = computeBestConfigs(config).topConfigs;
       for (let i = 0; i < top.length; i++) {
@@ -264,8 +267,8 @@ export class AppComponent implements OnDestroy {
       this.selectedConfig = top[0];
       this.isOpen = true;
       const configToSave = {
-        "inventories": JSON.parse(localStorage.inventories),
-        "configs": JSON.parse(localStorage.configs),
+        inventories: JSON.parse(localStorage.inventories),
+        configs: JSON.parse(localStorage.configs),
       };
       for (let i = 0; i < 15; i++) {
         const key = `configs${i}`;
@@ -280,13 +283,13 @@ export class AppComponent implements OnDestroy {
 
   selectedConfig: Config | null = null;
 
-  mode = 'graph';
+  mode: AppMode = 'graph';
   configJson = '';
 
   constructor() {
     this.inventories = JSON.parse(localStorage.inventories ?? '{}');
     const nutrition = this.inventories["Nutrition"];
-    if (nutrition && nutrition.hasOwnProperty("Neutral Energy")) {
+    if (nutrition && Object.prototype.hasOwnProperty.call(nutrition, 'Neutral Energy')) {
       nutrition["Natural Energy"] = nutrition["Neutral Energy"];
       delete nutrition["Neutral Energy"];
     }
@@ -296,12 +299,12 @@ export class AppComponent implements OnDestroy {
       }
     }
 
-    const configs = JSON.parse(localStorage.configs ?? '{}');
-    const formConfigs = {};
-    for (const attr of ATTRIBUTES)
-      formConfigs[attr] = new UntypedFormControl(configs[attr] ?? 1);
-    formConfigs['levelCap'] = new UntypedFormControl(configs['levelCap'] ?? 12);
-    this.formGroup = new UntypedFormGroup(formConfigs);
+    const configs = JSON.parse(localStorage.configs ?? '{}') as Partial<FormConfigs>;
+    const controls = { levelCap: new FormControl<number>(configs.levelCap ?? 12, { nonNullable: true }) } as AppFormModel;
+    for (const attr of ATTRIBUTES) {
+      controls[attr] = new FormControl<number | string>(configs[attr] ?? 1, { nonNullable: true });
+    }
+    this.formGroup = new FormGroup<AppFormModel>(controls);
 
     for (const category of CATEGORIES) {
       const items = [];
@@ -312,20 +315,20 @@ export class AppComponent implements OnDestroy {
       for (const item of value) {
         const attrs = [];
         const total = [];
-        for (const [attr, skills] of Object.entries<any>(item.skills)) {
-          const i = ATTRIBUTES.indexOf(attr);
+        for (const [attr, skills] of Object.entries<number[]>(item.skills)) {
+          const i = ATTRIBUTES.indexOf(attr as Attribute);
           if (i === -1) {
             alert('Unknown attribute: ' + attr);
             continue;
           }
-          attrs.push({attr, skills});
+          attrs.push({ attr, skills });
           for (let i = 0; i < skills.length; i++) {
             total[i] = (total[i] ?? 0) + skills[i];
           }
         }
-        items.push({...item, attrs, total});
+        items.push({ ...item, attrs, total });
       }
-      this.gears.push({category, items});
+      this.gears.push({ category, items });
     }
 
     this.subscription = this.formGroup.valueChanges
@@ -337,17 +340,17 @@ export class AppComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  get levelCap(): any {
-    return this.formGroup.get('levelCap').value;
+  get levelCap(): number {
+    return this.formGroup.controls.levelCap.value;
   }
 
   toggleMode() {
     this.mode = this.mode === 'JSON' ? 'graph' : 'JSON';
   }
 
-  updateJson(val) {
+  updateJson(val: string) {
     try {
-      const json = JSON.parse(val);
+      const json = JSON.parse(val) as { inventories: ItemsByCategory; configs: FormConfigs } & Record<string, unknown>;
       this.inventories = json.inventories;
       this.formGroup.setValue(json.configs);
       for (let i = 0; i < 15; i++) {
@@ -358,7 +361,8 @@ export class AppComponent implements OnDestroy {
       this.computeTrigger$.next('');
       console.log('Changed configs', json);
     } catch (e) {
-      alert(e);
+      const message = e instanceof Error ? e.message : String(e);
+      alert(message);
       console.error(e);
     }
   }
@@ -384,43 +388,44 @@ export class AppComponent implements OnDestroy {
     return this.inventories?.[category]?.[name] === level;
   }
 
-  stats(powers: any) {
+  stats(powers: number) {
     const arr = [];
     for (const [i, attr] of ATTRIBUTES.entries()) {
       const power = getPower(powers, i);
       if (power) {
-        arr.push(`${attr.substr(0, 2)}:${power}`);
+        arr.push(`${attr.slice(0, 2)}:${power}`);
       }
     }
     return arr;
   }
 
   isRangeValue(attr: string) {
-    const strValue = this.formGroup.get(attr).value + '';
+    const strValue = String(this.formGroup.controls[attr as Attribute].value);
     return strValue.indexOf('-') !== -1;
   }
 
   isInvalidValue(attr: string) {
     const re = /^\d{1,3}(-\d{0,3})?$/;
-    return !re.exec(this.formGroup.get(attr).value);
+    return !re.test(String(this.formGroup.controls[attr as Attribute].value));
   }
 
   toggleFormat(attr: string) {
-    const strValue = this.formGroup.get(attr).value + '';
+    const attribute = attr as Attribute;
+    const strValue = String(this.formGroup.controls[attribute].value);
     const newValue = this.isRangeValue(attr) ? +strValue.split('-')[0] : (strValue + '-999');
-    this.formGroup.get(attr).setValue(newValue);
+    this.formGroup.controls[attribute].setValue(newValue);
   }
 
-  changeLevelCap(levelCap) {
+  changeLevelCap(levelCap: number) {
     const configsJson = localStorage[`configs${levelCap}`];
     if (configsJson) {
-      this.formGroup.setValue(JSON.parse(configsJson));
+      this.formGroup.setValue(JSON.parse(configsJson) as FormConfigs);
     }
-    this.formGroup.get('levelCap').setValue(levelCap);
+    this.formGroup.controls.levelCap.setValue(levelCap);
   }
 
   isIgnored(attr: string) {
-    const value = '' + this.formGroup.get(attr).value;
+    const value = String(this.formGroup.controls[attr as Attribute].value);
     return value.startsWith('0');
   }
 

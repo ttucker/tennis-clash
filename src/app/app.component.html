@@ -7,12 +7,12 @@
   You can update incorrect attribute values by clicking the [<b>edit</b>] link at the top-left of the table,
   edit the fandom Wiki page to the correct value, then let me know by sending feedback (at the bottom of this page).
   If you would like to export/import your current card settings,
-  <b><u><a style="cursor: pointer; color: blue" (click)="toggleMode()">click here</a></u></b>
+  <b><u><button type="button" style="cursor: pointer; color: blue" (click)="toggleMode()">click here</button></u></b>
   to toggle to JSON mode and copy/paste the JSON text.
 </p>
 
 @if (mode === 'JSON') {
-  <textarea (change)="updateJson(ta.value)" #ta rows="30" cols="30">{{ configJson }}</textarea>
+  <textarea (change)="updateJson(ta.value)" #ta rows="30" cols="40">{{ configJson }}</textarea>
 }
 
 @if (mode !== 'JSON') {
@@ -30,7 +30,7 @@
                   <table>
                     <tr>
                       <td>
-                        <img height="100" [src]="item.imageUrl">
+                        <img height="100" [src]="item.imageUrl" [alt]="item.name">
                       </td>
                     </tr>
                     <tr>
@@ -137,7 +137,7 @@
       @for (attr of ATTRIBUTES; track attr) {
         <tr height="33" [ngClass]="{'ignored': isIgnored(attr)}">
           <td>
-            <a style="cursor: pointer; color: blue" (click)="toggleFormat(attr)">{{ attr }}</a>
+            <button type="button" style="cursor: pointer; color: blue" (click)="toggleFormat(attr)">{{ attr }}</button>
           </td>
           <td width="60" [ngClass]="{'invalid': isInvalidValue(attr)}">
             @if (isRangeValue(attr)) {
@@ -167,7 +167,7 @@
         <table [@toggleClick]="isOpen" class="border" cellpadding="5" cellspacing="0">
           <tr height="40">
             @for (c of topConfigs; track c; let i = $index) {
-              <th [ngClass]="{'selected': selectedConfig == c, 'number': true}"
+              <th [ngClass]="{'selected': selectedConfig === c, 'number': true}"
                 (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
                 <div style="width: 25px">#{{ i + 1 }}</div>
               </th>
@@ -176,7 +176,7 @@
           @for (attr of ATTRIBUTES; track attr; let attrIndex = $index) {
             <tr height="33" [ngClass]="{'ignored': isIgnored(attr)}">
               @for (c of topConfigs; track c; let i = $index) {
-                <td [ngClass]="{'selected': selectedConfig == c, 'number': true}"
+                <td [ngClass]="{'selected': selectedConfig === c, 'number': true}"
                   (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
                 {{ getPower(c.currentPowers, attrIndex) }}</td>
               }
@@ -184,7 +184,7 @@
           }
           <tr height="53">
             @for (c of topConfigs; track c; let i = $index) {
-              <td [ngClass]="{'selected': selectedConfig == c, 'number': true}"
+              <td [ngClass]="{'selected': selectedConfig === c, 'number': true}"
                 (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
                 <b>{{ c.totalPower }}</b>
                 <br>
