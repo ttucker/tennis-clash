@@ -25,15 +25,14 @@
   align-items: center;
 }
 
-.border td {
+.border td,
+.border th {
   border-right: 1px solid lightgray;
   border-bottom: 1px solid lightgray;
 }
 
 .border th {
   background-color: #DDD;
-  border-right: 1px solid lightgray;
-  border-bottom: 1px solid lightgray;
 }
 
 .selected {
@@ -44,18 +43,6 @@ th.number,
 td.number {
   cursor: pointer;
   text-align: right;
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
 }
 
 .invalid {
