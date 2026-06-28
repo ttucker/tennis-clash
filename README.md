@@ -1,6 +1,6 @@
 # TennisClash
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.6.
+This project currently uses Angular 22.
 
 ## Development server
 
@@ -12,15 +12,17 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Run `ng build --configuration production` to build the project. Build output is written to the `dist/` directory.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `ng test` to execute the unit tests via Karma.
+
+Note: headless test runs require a local Chrome binary (or setting `CHROME_BIN`).
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Legacy Protractor e2e scaffolding exists in this repository, but `ng e2e` is not currently functional after Angular 22 migration.
 
 ## Further help
 

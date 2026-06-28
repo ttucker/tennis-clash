@@ -4,9 +4,7 @@ import { AppComponent } from './app.component';
 describe('AppComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AppComponent
-      ],
+      imports: [AppComponent],
     }).compileComponents();
   }));
 
@@ -16,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'tennis-clash'`, () => {
+  it('should default to graph mode', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('tennis-clash');
+    expect(app.mode).toEqual('graph');
   });
 
-  it('should render title', () => {
+  it('should toggle mode', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('tennis-clash app is running!');
+    const app = fixture.componentInstance;
+    app.toggleMode();
+    expect(app.mode).toEqual('JSON');
   });
 });

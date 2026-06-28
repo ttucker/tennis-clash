@@ -1,10 +1,10 @@
 :host ::ng-deep .mat-mdc-tab {
-  min-width: 60px !important;
-  padding: 0px !important;
+  min-width: 60px;
+  padding: 0;
 }
 
 :host ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
-  padding: 3px !important;
+  padding: 3px;
 }
 
 :host ::ng-deep .items .mat-mdc-tab-header {
@@ -12,7 +12,7 @@
 }
 
 :host ::ng-deep .items .mat-mdc-tab {
-  height: 150px !important;
+  height: 150px;
 }
 
 :host ::ng-deep .items .mdc-tab__content,

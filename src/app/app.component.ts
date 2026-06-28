@@ -234,7 +234,7 @@ function computeBestConfigs(config: Config) {
     const current = getPower(config.currentPowers, i);
     if (current + maxRemainer < minimum) return config;
     if (current > maximum) return config;
-    if (config.powerConfig[i].minimum == 0) continue;
+    if (config.powerConfig[i].minimum === 0) continue;
     config.totalPower += getPower(config.currentPowers, i);
   }
 

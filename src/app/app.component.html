@@ -17,14 +17,14 @@
 
 @if (mode !== 'JSON') {
   <mat-tab-group animationDuration="300ms">
-    @for (g of gears; track g) {
+    @for (g of gears; track g.category) {
       <mat-tab>
         <ng-template mat-tab-label>
           {{g.category}}
         </ng-template>
         <ng-template matTabContent>
           <mat-tab-group class="items">
-            @for (item of g.items; track item) {
+            @for (item of g.items; track item.name) {
               <mat-tab>
                 <ng-template mat-tab-label>
                   <table>
@@ -139,7 +139,7 @@
           <td>
             <button type="button" style="cursor: pointer; color: blue" (click)="toggleFormat(attr)">{{ attr }}</button>
           </td>
-          <td width="60" [ngClass]="{'invalid': isInvalidValue(attr)}">
+          <td width="110" [ngClass]="{'invalid': isInvalidValue(attr)}">
             @if (isRangeValue(attr)) {
               <input type="text" [formControlName]="attr" style="width: 50px;">
             } @else {
