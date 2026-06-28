@@ -1,6 +1,6 @@
 # TennisClash
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.6.
+This project currently uses Angular 22.
 
 ## Development server
 
@@ -12,16 +12,30 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Run `ng build --configuration production` to build the project. Build output is written to the `dist/` directory.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `ng test` to execute the unit tests via Karma.
+
+Note: headless test runs require a local Chrome binary (or setting `CHROME_BIN`).
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Run `npm run e2e` to execute end-to-end tests via Playwright.
+
+- First-time setup: `npx playwright install chromium`
+- Optional UI mode: `npm run e2e:ui`
 
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+## Scraper
+
+This repository includes a MediaWiki-based scraper that regenerates `src/app/gears.ts` from Tennis Clash Fandom pages.
+
+- Run it with: `npm run scrape`
+- The canonical scraper is `scripts/scrape_api.mjs` (ESM). The generated file is `src/app/gears.ts`.
+
+Legacy scrapers were previously archived in `scripts/legacy/` and have been removed.

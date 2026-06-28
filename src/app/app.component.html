@@ -7,86 +7,107 @@
   You can update incorrect attribute values by clicking the [<b>edit</b>] link at the top-left of the table,
   edit the fandom Wiki page to the correct value, then let me know by sending feedback (at the bottom of this page).
   If you would like to export/import your current card settings,
-  <b><u><a style="cursor: pointer; color: blue" (click)="toggleMode()">click here</a></u></b>
+  <b><u><button type="button" style="cursor: pointer; color: blue" (click)="toggleMode()">click here</button></u></b>
   to toggle to JSON mode and copy/paste the JSON text.
 </p>
 
-<textarea *ngIf="mode === 'JSON'" (change)="updateJson(ta.value)" #ta rows="30" cols="30">{{ configJson }}</textarea>
+@if (mode === 'JSON') {
+  <textarea (change)="updateJson(ta.value)" #ta rows="30" cols="40">{{ configJson }}</textarea>
+}
 
-<mat-tab-group *ngIf="mode !== 'JSON'">
-  <mat-tab *ngFor="let g of gears">
-    <ng-template mat-tab-label>
-      {{g.category}}
-    </ng-template>
-    <ng-template matTabContent>
-      <mat-tab-group class="items">
-        <mat-tab *ngFor="let item of g.items">
-          <ng-template mat-tab-label>
-            <table>
-              <tr>
-                <td>
-                  <img height="100" [src]="item.imageUrl">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  {{item.name}}
-                  <ng-container *ngIf="inventories[g.category][item.name] as level">
-                    ({{ level + 1 }})
-                  </ng-container>
-                  <!-- {{item.rarity}}<br> -->
-                  <!-- {{item.foundIn}} -->
-                </td>
-              </tr>
-            </table>
-          </ng-template>
-          <table class="border" cellpadding="5" cellspacing="0">
-            <tr>
-              <th width="80">Level [<a [href]="item.url + '?veaction=edit&section=2'" target="_blank">edit</a>]</th>
-              <th width="25" *ngFor="let v of item.total; index as i" (click)="setInventory(g.category, item.name, i)"
-                [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
-                {{ i + 1 }}
-              </th>
-            </tr>
-            <tr *ngFor="let a of item.attrs">
-              <td>{{ a.attr }}</td>
-              <td *ngFor="let s of a.skills; index as i" (click)="setInventory(g.category, item.name, i)"
-                [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
-                {{ s }}</td>
-            </tr>
-            <tr>
-              <th>Total Power</th>
-              <th *ngFor="let t of item.total; index as i" (click)="setInventory(g.category, item.name, i)"
-                [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
-                {{ t }}</th>
-            </tr>
-            <tr *ngIf="item.upgrade.Cards">
-              <td>Up Cards</td>
-              <td *ngFor="let c of item.upgrade.Cards; index as i" (click)="setInventory(g.category, item.name, i)"
-                [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
-                {{ formatUpgrade(c) }}</td>
-            </tr>
-            <tr *ngIf="item.upgrade.Price">
-              <td>Up Price</td>
-              <td *ngFor="let p of item.upgrade.Price; index as i" (click)="setInventory(g.category, item.name, i)"
-                [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
-                {{ formatUpgrade(p) }}</td>
-            </tr>
-          </table>
-        </mat-tab>
-      </mat-tab-group>
-    </ng-template>
-  </mat-tab>
-</mat-tab-group>
+@if (mode !== 'JSON') {
+  <mat-tab-group animationDuration="300ms">
+    @for (g of gears; track g.category) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          {{g.category}}
+        </ng-template>
+        <ng-template matTabContent>
+          <mat-tab-group class="items">
+            @for (item of g.items; track item.name) {
+              <mat-tab>
+                <ng-template mat-tab-label>
+                  <table>
+                    <tr>
+                      <td>
+                        <img width="auto" height="100" [src]="item.imageUrl" [alt]="item.name">
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        {{item.name}}
+                        @if (inventories[g.category]?.[item.name] !== undefined) {
+                          ({{ inventories[g.category]?.[item.name]! + 1 }})
+                        }
+                        <!-- {{item.rarity}}<br> -->
+                        <!-- {{item.foundIn}} -->
+                      </td>
+                    </tr>
+                  </table>
+                </ng-template>
+                <table class="border" cellpadding="5" cellspacing="0">
+                  <tr>
+                    <th width="80">Level [<a [href]="item.url + '?veaction=edit&section=2'" target="_blank">edit</a>]</th>
+                    @for (v of item.total; track $index; let i = $index) {
+                      <th width="25" (click)="setInventory(g.category, item.name, i)"
+                        [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
+                        {{ i + 1 }}
+                      </th>
+                    }
+                  </tr>
+                  @for (a of item.attrs; track a) {
+                    <tr>
+                      <td>{{ a.attr }}</td>
+                      @for (s of a.skills; track $index; let i = $index) {
+                        <td (click)="setInventory(g.category, item.name, i)"
+                          [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
+                        {{ s }}</td>
+                      }
+                    </tr>
+                  }
+                  <tr>
+                    <th>Total Power</th>
+                    @for (t of item.total; track $index; let i = $index) {
+                      <th (click)="setInventory(g.category, item.name, i)"
+                        [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
+                      {{ t }}</th>
+                    }
+                  </tr>
+                  @if (item.upgrade.Cards) {
+                    <tr>
+                      <td>Up Cards</td>
+                      @for (c of item.upgrade.Cards; track $index; let i = $index) {
+                        <td (click)="setInventory(g.category, item.name, i)"
+                          [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
+                        {{ formatUpgrade(c) }}</td>
+                      }
+                    </tr>
+                  }
+                  @if (item.upgrade.Price) {
+                    <tr>
+                      <td>Up Price</td>
+                      @for (p of item.upgrade.Price; track $index; let i = $index) {
+                        <td (click)="setInventory(g.category, item.name, i)"
+                          [ngClass]="{'selected': hasInventory(g.category, item.name, i), 'number': true}">
+                        {{ formatUpgrade(p) }}</td>
+                      }
+                    </tr>
+                  }
+                </table>
+              </mat-tab>
+            }
+          </mat-tab-group>
+        </ng-template>
+      </mat-tab>
+    }
+  </mat-tab-group>
+}
 
-<ng-container *ngIf="(bestConfigs$ | async) as topConfigs">
-  <ng-container *ngIf="hasAtLeastOneInventory()">
+@if ((bestConfigs$ | async); as topConfigs) {
+  @if (hasAtLeastOneInventory()) {
     <p></p>
-
     <mat-divider></mat-divider>
-
     <h1 style="padding: 10px; margin: 0;">Find Your Best Lineup</h1>
-
     <p style="padding: 10px; margin-top: 0;">
       After selecting your available cards (for each category) above,
       the table below will give you the best achievable Total Power in descending order.
@@ -97,142 +118,169 @@
       If you don't care about the attribute, set the preferred power to "ignore"
       to exclude it from the Total Power computation.
     </p>
-
     <table>
       <tr>
         <th>Set Level Cap :</th>
         <td width="50">
           <mat-select [value]="levelCap" (selectionChange)="changeLevelCap($event.value)">
-            <mat-option *ngFor="let e of [].constructor(9); index as i" [value]="i+4">{{ i+5 }}</mat-option>
+            @for (e of [].constructor(9); track $index; let i = $index) {
+              <mat-option [value]="i+4">{{ i+5 }}</mat-option>
+            }
           </mat-select>
         </td>
       </tr>
     </table>
-
     <table [formGroup]="formGroup" class="border" cellpadding="5" cellspacing="0" style="float: left;">
       <tr>
         <th colspan="2" width="140" height="29" style="text-align: center;">Set Preferred Power</th>
       </tr>
-      <tr *ngFor="let attr of ATTRIBUTES" height="33" [ngClass]="{'ignored': isIgnored(attr)}">
-        <td>
-          <a style="cursor: pointer; color: blue" (click)="toggleFormat(attr)">{{ attr }}</a>
-        </td>
-        <td width="60" [ngClass]="{'invalid': isInvalidValue(attr)}">
-          <input *ngIf="isRangeValue(attr); else minValue" type="text" [formControlName]="attr" style="width: 50px;">
-          <ng-template #minValue>
-            <mat-select [formControlName]="attr">
-              <mat-option *ngFor="let e of [].constructor(121); index as i" [value]="i">
-                <ng-container *ngIf="i; else ignore">
-                  &#8805; {{ i }}
-                </ng-container>
-                <ng-template #ignore>ignore</ng-template>
-              </mat-option>
-            </mat-select>
-          </ng-template>
-        </td>
-      </tr>
+      @for (attr of ATTRIBUTES; track attr) {
+        <tr height="33" [ngClass]="{'ignored': isIgnored(attr)}">
+          <td>
+            <button type="button" style="cursor: pointer; color: blue" (click)="toggleFormat(attr)">{{ attr }}</button>
+          </td>
+          <td width="110" [ngClass]="{'invalid': isInvalidValue(attr)}">
+            @if (isRangeValue(attr)) {
+              <input type="text" [formControlName]="attr" style="width: 50px;">
+            } @else {
+              <mat-select [formControlName]="attr">
+                @for (e of [].constructor(121); track $index; let i = $index) {
+                  <mat-option [value]="i">
+                    @if (i) {
+                      &#8805; {{ i }}
+                    } @else {
+                      ignore
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+            }
+          </td>
+        </tr>
+      }
       <tr height="53">
         <th colspan="2" style="text-align: right;">Total Power (Desc):<br>Character:</th>
       </tr>
     </table>
-
     <div style="width: calc(100% - 152px); overflow-x:scroll">
-      <table [@toggleClick]="isOpen" *ngIf="selectedConfig" class="border" cellpadding="5" cellspacing="0">
-        <tr height="40">
-          <th *ngFor="let c of topConfigs; index as i" [ngClass]="{'selected': selectedConfig == c, 'number': true}"
-            (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
-            <div style="width: 25px">#{{ i + 1 }}</div>
-          </th>
-        </tr>
-        <tr *ngFor="let attr of ATTRIBUTES; index as attrIndex" height="33" [ngClass]="{'ignored': isIgnored(attr)}">
-          <td *ngFor="let c of topConfigs; index as i" [ngClass]="{'selected': selectedConfig == c, 'number': true}"
-            (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
-            {{ getPower(c.currentPowers, attrIndex) }}</td>
-        </tr>
-        <tr height="53">
-          <td *ngFor="let c of topConfigs; index as i" [ngClass]="{'selected': selectedConfig == c, 'number': true}"
-            (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
-            <b>{{ c.totalPower }}</b>
-            <br>
-            {{ c.itemNames[0] | slice:0:2 }}
-          </td>
-        </tr>
-      </table>
-
-      <table *ngIf="!selectedConfig" cellpadding="25">
-        <tr>
-          <td height="100%">
-            <br>
-            <br>
-            <h2>No lineup found</h2>
-            <br>
-            Try decreasing your preferred minimum powers or increasing the maximum powers.
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <br style="clear: both;">
-
-    <table *ngIf="selectedConfig as c" class="border" cellspacing="0" cellpadding="5" style="float: left;">
-      <tr>
-        <th width="80">Category</th>
-        <th width="160" nowrap>Selected Item Name</th>
-      </tr>
-      <tr *ngFor="let cat of CATEGORIES; index as i">
-        <td>{{ cat }}</td>
-        <td>
-          <b *ngIf="c.itemNames[i]; else tooRestrictive">{{ c.itemNames[i] }}</b>
-          <ng-template #tooRestrictive><b style="color: red">None</b></ng-template>
-          ({{ c.itemLevel[i][c.itemNames[i]] }})
-        </td>
-      </tr>
-      <tr>
-        <th colspan="2" align="right">Total Power ({{ sumPowers(c.currentPowers) }}):</th>
-      </tr>
-    </table>
-
-    <div style="width: calc(100% - 263px); overflow-x:scroll">
-      <table *ngIf="selectedConfig as c" class="border" cellspacing="0" cellpadding="5">
-        <tr>
-          <th *ngFor="let attr of ATTRIBUTES;">
-            <div style="width: 30px">{{ attr | slice:0:2 }}</div>
-          </th>
-        </tr>
-        <tr *ngFor="let cat of CATEGORIES; index as i">
-          <td *ngFor="let attr of ATTRIBUTES; index as attrIndex" align="center">
-            {{ getPower(c.itemPowers[i][c.itemNames[i]], attrIndex) || '-'}}
-          </td>
-        </tr>
-        <tr>
-          <th *ngFor="let attr of ATTRIBUTES; index as attrIndex" align="center">
-            {{ getPower(c.currentPowers, attrIndex) || '-'}}
-          </th>
-        </tr>
-      </table>
-    </div>
-
-    <br #endMarker>
-  </ng-container>
-
-  <table cellpadding="5">
-    <tr>
-      <td>
-        <iframe src="https://github.com/sponsors/ttucker/button" title="Sponsor ttucker" height="32" width="114" style="border: 0; border-radius: 7px;"></iframe>
-      </td>
-      <td>
-        If you like this tool, you can support it by becoming a sponsor.
-      </td>
-    </tr>
-  </table>
-
-  <mat-divider></mat-divider>
-  <p style="padding: 5px;">
-    <a href="mailto:tavis.tucker@yahoo.com">Send
-      Feedback</a> &nbsp; | &nbsp;
-    <!--<a href="https://www.facebook.com/groups/2305127729776201/permalink/2659181671037470" target="_blank">Send
-      Feedback</a> &nbsp; | &nbsp;-->
-    <a href="https://github.com/ttucker/tennis-clash" target="_blank">Source Code</a> &nbsp; | &nbsp;
-    <a href="https://tennis-clash.fandom.com/wiki/Category:Items" target="_blank">Dataset</a>
-  </p>
-</ng-container>
+      @if (selectedConfig) {
+        <table [@toggleClick]="isOpen" class="border" cellpadding="5" cellspacing="0">
+          <tr height="40">
+            @for (c of topConfigs; track $index; let i = $index) {
+              <th [ngClass]="{'selected': selectedConfig === c, 'number': true}"
+                (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
+                <div style="width: 25px">#{{ i + 1 }}</div>
+              </th>
+            }
+          </tr>
+          @for (attr of ATTRIBUTES; track attr; let attrIndex = $index) {
+            <tr height="33" [ngClass]="{'ignored': isIgnored(attr)}">
+              @for (c of topConfigs; track $index; let i = $index) {
+                <td [ngClass]="{'selected': selectedConfig === c, 'number': true}"
+                  (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
+                {{ getPower(c.currentPowers, attrIndex) }}</td>
+              }
+            </tr>
+          }
+          <tr height="53">
+            @for (c of topConfigs; track $index; let i = $index) {
+              <td [ngClass]="{'selected': selectedConfig === c, 'number': true}"
+                (click)="selectedConfig = c; endMarker.scrollIntoView({behavior:'smooth', block: 'end'})">
+                <b>{{ c.totalPower }}</b>
+                <br>
+                  {{ c.itemNames[0] | slice:0:2 }}
+                </td>
+              }
+            </tr>
+          </table>
+        }
+        @if (!selectedConfig) {
+          <table cellpadding="25">
+            <tr>
+              <td height="100%">
+                <br>
+                  <br>
+                    <h2>No lineup found</h2>
+                    <br>
+                      Try decreasing your preferred minimum powers or increasing the maximum powers.
+                    </td>
+                  </tr>
+                </table>
+              }
+            </div>
+            <br style="clear: both;">
+            @if (selectedConfig; as c) {
+              <table class="border" cellspacing="0" cellpadding="5" style="float: left;">
+                <tr>
+                  <th width="80">Category</th>
+                  <th width="160" nowrap>Selected Item Name</th>
+                </tr>
+                @for (cat of CATEGORIES; track cat; let i = $index) {
+                  <tr>
+                    <td>{{ cat }}</td>
+                    <td>
+                      @if (c.itemNames[i]) {
+                        <b>{{ c.itemNames[i] }}</b>
+                      } @else {
+                        <b style="color: red">None</b>
+                      }
+                      ({{ c.itemLevel[i][c.itemNames[i]] }})
+                    </td>
+                  </tr>
+                }
+                <tr>
+                  <th colspan="2" align="right">Total Power ({{ sumPowers(c.currentPowers) }}):</th>
+                </tr>
+              </table>
+            }
+            <div style="width: calc(100% - 263px); overflow-x:scroll">
+              @if (selectedConfig; as c) {
+                <table class="border" cellspacing="0" cellpadding="5">
+                  <tr>
+                    @for (attr of ATTRIBUTES; track attr) {
+                      <th>
+                        <div style="width: 30px">{{ attr | slice:0:2 }}</div>
+                      </th>
+                    }
+                  </tr>
+                  @for (cat of CATEGORIES; track cat; let i = $index) {
+                    <tr>
+                      @for (attr of ATTRIBUTES; track attr; let attrIndex = $index) {
+                        <td align="center">
+                          {{ getPower(c.itemPowers[i][c.itemNames[i]], attrIndex) || '-'}}
+                        </td>
+                      }
+                    </tr>
+                  }
+                  <tr>
+                    @for (attr of ATTRIBUTES; track attr; let attrIndex = $index) {
+                      <th align="center">
+                        {{ getPower(c.currentPowers, attrIndex) || '-'}}
+                      </th>
+                    }
+                  </tr>
+                </table>
+              }
+            </div>
+            <br #endMarker>
+          }
+          <table cellpadding="5">
+            <tr>
+              <td>
+                <iframe src="https://github.com/sponsors/ttucker/button" title="Sponsor ttucker" height="32" width="114" style="border: 0; border-radius: 7px;"></iframe>
+              </td>
+              <td>
+                If you like this tool, you can support it by becoming a sponsor.
+              </td>
+            </tr>
+          </table>
+          <mat-divider></mat-divider>
+          <p style="padding: 5px;">
+            <a href="mailto:tavis.tucker@yahoo.com">Send
+            Feedback</a> &nbsp; | &nbsp;
+            <!--<a href="https://www.facebook.com/groups/2305127729776201/permalink/2659181671037470" target="_blank">Send
+          Feedback</a> &nbsp; | &nbsp;-->
+          <a href="https://github.com/ttucker/tennis-clash" target="_blank">Source Code</a> &nbsp; | &nbsp;
+          <a href="https://tennis-clash.fandom.com/wiki/Category:Items" target="_blank">Dataset</a>
+        </p>
+      }
